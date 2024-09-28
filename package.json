@@ -1,5 +1,5 @@
 {
-  "name": "@envbyte/react-websocket",
+  "name": "reactive-socket",
   "type": "module",
   "files": [
     "dist"
@@ -18,9 +18,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Env-byte/react-websocket.git"
+    "url": "git+https://github.com/Env-byte/reactive-socket.git"
   },
-  "url": "https://github.com/Env-byte/react-websocket",
+  "url": "https://github.com/Env-byte/reactive-socket",
   "keywords": [
     "react",
     "state",
