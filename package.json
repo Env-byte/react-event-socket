@@ -1,7 +1,6 @@
 {
   "name": "@envbyte/react-socket",
   "type": "module",
-  "private": "false",
   "files": [
     "dist"
   ],
