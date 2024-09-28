@@ -1,5 +1,5 @@
 {
-  "name": "@envbyte/react-socket",
+  "name": "react-event-socket",
   "type": "module",
   "files": [
     "dist"
