@@ -1,0 +1,22 @@
+{
+  "extends": [
+    "airbnb",
+    "airbnb/hooks",
+    "airbnb-typescript",
+    "prettier"
+  ],
+  "rules": {
+    "no-console": "off",
+    "no-plusplus": "off",
+    "no-continue": "off",
+    "no-param-reassign": "off",
+    "import/prefer-default-export": "off",
+    "react/react-in-jsx-scope": "off"
+  },
+  "parserOptions": {
+    "project": "./tsconfig.app.json"
+  },
+  "ignorePatterns": [
+    "vite.config.ts"
+  ]
+}
