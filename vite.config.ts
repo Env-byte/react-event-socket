@@ -21,9 +21,9 @@ export default defineConfig(({ command }) => {
             lib: {
                 // Could also be a dictionary or array of multiple entry points
                 entry: resolve(__dirname, 'src/index.ts'),
-                name: 'react-socket',
+                name: 'index',
                 // the proper extensions will be added
-                fileName: 'react-socket',
+                fileName: 'index',
             },
             rollupOptions: {
                 // make sure to externalize deps that shouldn't be bundled
