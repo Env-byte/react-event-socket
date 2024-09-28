@@ -1,4 +1,3 @@
-import React from 'react';
 import { expect } from 'vitest';
 import { act, render } from '@testing-library/react';
 import { createStore } from './store';

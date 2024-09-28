@@ -1,9 +1,13 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import dts from 'vite-plugin-dts';
 
 export default defineConfig(({ command }) => {
-    const plugins = command === 'serve' ? [react()] : [];
+    const plugins =
+        command === 'serve'
+            ? [react()]
+            : [dts({ tsconfigPath: './tsconfig.app.json', rollupTypes: true })];
     return {
         plugins,
         test: {
