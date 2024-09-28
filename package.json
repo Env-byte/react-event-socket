@@ -1,6 +1,7 @@
 {
-  "name": "reactive-socket",
+  "name": "@envbyte/react-socket",
   "type": "module",
+  "private": "false",
   "files": [
     "dist"
   ],
@@ -18,9 +19,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Env-byte/reactive-socket.git"
+    "url": "git+https://github.com/Env-byte/react-socket.git"
   },
-  "url": "https://github.com/Env-byte/reactive-socket",
+  "url": "https://github.com/Env-byte/react-socket",
   "keywords": [
     "react",
     "state",
