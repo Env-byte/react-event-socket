@@ -16,10 +16,16 @@
     "build": "vite build",
     "test": "vitest --no-watch"
   },
-  "keywords": [],
-  "author": "",
+  "repository": "https://github.com/Env-byte/react-socket",
+  "url": "https://github.com/Env-byte/react-socket",
+  "keywords": [
+    "react",
+    "state",
+    "stepper"
+  ],
+  "author": "Env-byte",
   "license": "ISC",
-  "description": "",
+  "description": "A package to help use WebSocket with React",
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.0.1",
