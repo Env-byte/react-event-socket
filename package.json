@@ -1,23 +1,26 @@
 {
-  "name": "react-socket",
+  "name": "react-websocket-socket",
   "type": "module",
   "files": [
     "dist"
   ],
-  "main": "./dist/react-socket.umd.cjs",
-  "module": "./dist/react-socket.js",
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
   "exports": {
     ".": {
-      "import": "./dist/react-socket.js",
-      "require": "./dist/react-socket.umd.cjs"
+      "import": "./dist/index.js",
+      "require": "./dist/index.umd.cjs"
     }
   },
   "scripts": {
     "build": "vite build",
     "test": "vitest --no-watch"
   },
-  "repository": "https://github.com/Env-byte/react-socket",
-  "url": "https://github.com/Env-byte/react-socket",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Env-byte/react-websocket-socket.git"
+  },
+  "url": "https://github.com/Env-byte/react-websocket-socket",
   "keywords": [
     "react",
     "state",
@@ -59,5 +62,6 @@
   },
   "dependencies": {
     "zustand": "^5.0.0-rc.2"
-  }
+  },
+  "version": "1.0.0"
 }
