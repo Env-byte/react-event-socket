@@ -18,9 +18,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Env-byte/react-socket.git"
+    "url": "git+https://github.com/Env-byte/react-event-socket.git"
   },
-  "url": "https://github.com/Env-byte/react-socket",
+  "url": "https://github.com/Env-byte/react-event-socket",
   "keywords": [
     "react",
     "state",
