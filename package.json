@@ -1,5 +1,5 @@
 {
-  "name": "react-websocket-socket",
+  "name": "@envbyte/react-websocket",
   "type": "module",
   "files": [
     "dist"
@@ -18,9 +18,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Env-byte/react-websocket-socket.git"
+    "url": "git+https://github.com/Env-byte/react-websocket.git"
   },
-  "url": "https://github.com/Env-byte/react-websocket-socket",
+  "url": "https://github.com/Env-byte/react-websocket",
   "keywords": [
     "react",
     "state",
