@@ -1,5 +1,5 @@
 import { Dispatches, Predicate, Prettify, Select, Store } from '../types';
-import { createStore } from '../store/store';
+import { createStore } from '../store';
 import {
     closeMessages,
     CloseMessages,
