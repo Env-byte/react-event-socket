@@ -41,9 +41,23 @@ export const jsonStringify = (payload: unknown) => {
     return false;
 };
 
+interface Buffer {
+    type: 'Buffer';
+    data: number[];
+}
+
+const isBuffer = (obj: any): obj is Buffer =>
+    typeof 'obj' === 'object' && obj && 'type' in obj && obj.type === 'Buffer';
+
+const parseBuffer = (buffer: Buffer) => {
+    const encoder = new TextDecoder('utf-8');
+    const array = new Uint8Array(buffer.data);
+    return encoder.decode(array);
+};
+
 const convertBuffersToStrings = (obj: unknown): unknown => {
-    if (Buffer.isBuffer(obj)) {
-        return obj.toString(); // Convert buffer to string
+    if (isBuffer(obj)) {
+        return parseBuffer(obj); // Convert buffer to string
     }
 
     if (Array.isArray(obj)) {
