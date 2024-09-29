@@ -84,7 +84,7 @@ export class ReactSocket<TEvent extends Record<string, any> = {}> {
 
             const key =
                 `set${toCamelCase(eventName)}` as keyof typeof dispatches;
-            (dispatches[key] as any)();
+            (dispatches[key] as any)(data);
             return;
         }
 

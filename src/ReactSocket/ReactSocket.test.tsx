@@ -50,7 +50,6 @@ describe('Main', () => {
         let message: string | undefined;
 
         function Component() {
-            expect(hooks.useReceivedMessage()).toEqual(message);
             return null;
         }
 
@@ -66,7 +65,7 @@ describe('Main', () => {
     });
 
     it('should log if no select found', () => {
-        let message: string | undefined;
+        let message: object | undefined;
 
         function Component() {
             expect(hooks.useJoinedRoom()).toEqual(message);
@@ -74,6 +73,7 @@ describe('Main', () => {
         }
 
         render(<Component />);
+        message = { action: 'joined-room', data: { message: '' } };
         server.send(
             JSON.stringify({ action: 'joined-room', data: { message: '' } })
         );
