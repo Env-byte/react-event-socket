@@ -77,7 +77,7 @@ export class ReactSocket<TEvent extends Record<string, any> = {}> {
             if (!predicate(parsed)) continue;
 
             const data = this.getData(eventName, parsed);
-            if (this.verbose) console.info(`${eventName} - ${data}`);
+            if (this.verbose) console.info(`${eventName}`, data);
 
             const key =
                 `set${toCamelCase(eventName)}` as keyof typeof dispatches;
