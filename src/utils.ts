@@ -31,3 +31,12 @@ export const socketStatus = {
     2: 'closing',
 } as const;
 export type SocketStatus = (typeof socketStatus)[keyof typeof socketStatus];
+
+export const jsonStringify = (payload: unknown) => {
+    try {
+        return JSON.stringify(payload);
+    } catch (e) {
+        console.error('Could not stringify:', e);
+    }
+    return false;
+};

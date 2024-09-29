@@ -3,6 +3,7 @@ import { createStore } from '../store/store';
 import {
     closeMessages,
     CloseMessages,
+    jsonStringify,
     socketStatus,
     SocketStatus,
     toCamelCase,
@@ -157,6 +158,15 @@ export class ReactSocket<TEvent extends Record<string, any> = {}> {
                 },
                 disconnect: () => {
                     if (this.verbose) console.info('Disconnecting from socket');
+                },
+                send: (payload: unknown) => {
+                    const data =
+                        typeof payload !== 'string'
+                            ? jsonStringify(payload)
+                            : payload;
+                    if (data === false) return;
+                    if (this.verbose) console.info('Sending data:', payload);
+                    this.socket?.send(data);
                 },
             },
             eventHooks,
