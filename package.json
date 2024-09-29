@@ -1,25 +1,34 @@
 {
-  "name": "react-socket",
+  "name": "react-event-socket",
   "type": "module",
   "files": [
     "dist"
   ],
-  "main": "./dist/react-socket.umd.cjs",
-  "module": "./dist/react-socket.js",
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
   "exports": {
     ".": {
-      "import": "./dist/react-socket.js",
-      "require": "./dist/react-socket.umd.cjs"
+      "import": "./dist/index.js",
+      "require": "./dist/index.umd.cjs"
     }
   },
   "scripts": {
     "build": "vite build",
     "test": "vitest --no-watch"
   },
-  "keywords": [],
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Env-byte/react-event-socket.git"
+  },
+  "url": "https://github.com/Env-byte/react-event-socket",
+  "keywords": [
+    "react",
+    "state",
+    "stepper"
+  ],
+  "author": "Env-byte",
   "license": "ISC",
-  "description": "",
+  "description": "A package to help use WebSocket with React",
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.0.1",
@@ -45,6 +54,7 @@
     "semantic-release": "^24.1.2",
     "typescript": "^5.5.2",
     "vite": "^5.4.8",
+    "vite-plugin-dts": "^4.2.2",
     "vitest": "^1.6.0"
   },
   "peerDependencies": {
@@ -53,5 +63,6 @@
   },
   "dependencies": {
     "zustand": "^5.0.0-rc.2"
-  }
+  },
+  "version": "1.0.0"
 }

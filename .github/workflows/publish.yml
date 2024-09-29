@@ -2,7 +2,7 @@ name: Release
 on:
   push:
     branches:
-      - main # or main
+      - '**'
 
 
 permissions:
@@ -13,7 +13,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     environment:
-      name: node
+      name: npm
     permissions:
       contents: write # to be able to publish a GitHub release
       issues: write # to be able to comment on released issues

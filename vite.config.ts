@@ -1,9 +1,13 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import dts from 'vite-plugin-dts';
 
 export default defineConfig(({ command }) => {
-    const plugins = command === 'serve' ? [react()] : [];
+    const plugins =
+        command === 'serve'
+            ? [react()]
+            : [dts({ tsconfigPath: './tsconfig.app.json', rollupTypes: true })];
     return {
         plugins,
         test: {
@@ -21,9 +25,9 @@ export default defineConfig(({ command }) => {
             lib: {
                 // Could also be a dictionary or array of multiple entry points
                 entry: resolve(__dirname, 'src/index.ts'),
-                name: 'react-socket',
+                name: 'index',
                 // the proper extensions will be added
-                fileName: 'react-socket',
+                fileName: 'index',
             },
             rollupOptions: {
                 // make sure to externalize deps that shouldn't be bundled
