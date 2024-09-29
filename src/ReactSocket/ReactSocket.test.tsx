@@ -26,7 +26,6 @@ const [socket, hooks] = new ReactSocket('ws://localhost:1234', true)
         }) => data.action === 'joined-room',
     })
     .build();
-
 describe('Main', () => {
     it('should handle socket messages', () => {
         let message: string | undefined;

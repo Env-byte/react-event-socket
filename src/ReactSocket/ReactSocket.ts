@@ -71,6 +71,7 @@ export class ReactSocket<TEvent extends Record<string, any> = {}> {
 
         for (let i = 0; i < eventMap.length; i++) {
             const { eventName, predicate } = eventMap[i];
+            if (this.verbose) console.info(`${eventName} - ${event}`);
 
             const parsed = JSON.parse(event.data);
             if (!predicate(parsed)) continue;
