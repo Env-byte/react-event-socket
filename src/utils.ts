@@ -40,3 +40,29 @@ export const jsonStringify = (payload: unknown) => {
     }
     return false;
 };
+
+const convertBuffersToStrings = (obj: unknown): unknown => {
+    if (Buffer.isBuffer(obj)) {
+        return obj.toString(); // Convert buffer to string
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map(convertBuffersToStrings); // Handle arrays
+    }
+
+    if (obj !== null && typeof obj === 'object') {
+        const newObj: Record<PropertyKey, unknown> = {};
+
+        Object.keys(obj).forEach((key) => {
+            newObj[key] = convertBuffersToStrings(obj[key as keyof typeof obj]);
+        });
+        return newObj;
+    }
+
+    return obj;
+};
+
+export const parseEventData = (data: string): unknown => {
+    const parsed = JSON.parse(data);
+    return convertBuffersToStrings(parsed);
+};

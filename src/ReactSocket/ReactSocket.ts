@@ -4,6 +4,7 @@ import {
     closeMessages,
     CloseMessages,
     jsonStringify,
+    parseEventData,
     socketStatus,
     SocketStatus,
     toCamelCase,
@@ -32,6 +33,8 @@ export class ReactSocket<TEvent extends Record<string, any> = {}> {
 
     private socket: WebSocket | undefined;
 
+    constructor(address: string);
+    constructor(address: string, verbose: boolean);
     constructor(address: string, verbose?: boolean) {
         this.address = address;
         this.verbose = verbose ?? false;
@@ -73,7 +76,7 @@ export class ReactSocket<TEvent extends Record<string, any> = {}> {
             const { eventName, predicate } = eventMap[i];
             if (this.verbose) console.info(`${eventName} - `, event);
 
-            const parsed = JSON.parse(event.data);
+            const parsed = parseEventData(event.data);
             if (!predicate(parsed)) continue;
 
             const data = this.getData(eventName, parsed);
