@@ -6,19 +6,26 @@ import { ReactSocket } from './ReactSocket';
 const infoSpy = vi.spyOn(console, 'info');
 const server = new WS('ws://localhost:1234');
 
+interface ReceivedMessage {
+  action: 'received-message';
+  data: { message: string };
+}
+
+interface JoinedRoom {
+  action: 'joined-room';
+  data: { message: string };
+}
+
 const [socket, hooks] = new ReactSocket('ws://localhost:1234', true)
   .addEvent({
     name: 'received-message',
-    predicate: (data: {
-      action: 'received-message';
-      data: { message: string };
-    }) => data.action === 'received-message',
-    select: (props) => props.data.message
+    predicate: (data: ReceivedMessage) => data.action === 'received-message',
+    select: (props) => props.data.message,
+    array: true
   })
   .addEvent({
     name: 'joined-room',
-    predicate: (data: { action: 'joined-room'; data: { message: string } }) =>
-      data.action === 'joined-room'
+    predicate: (data: JoinedRoom) => data.action === 'joined-room'
   })
   .build();
 
@@ -27,7 +34,7 @@ describe('Main', () => {
     vi.clearAllMocks();
   });
   it('should handle socket messages', () => {
-    const { result } = renderHook(() => hooks.useReceivedMessage());
+    const { result } = renderHook(() => hooks.useReceivedMessage()); // this should just be string[]
     let message = 'Hello World';
     server.send(
       JSON.stringify({ action: 'received-message', data: { message } })

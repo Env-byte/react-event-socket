@@ -1,32 +1,44 @@
-import { Dispatches, Predicate, Prettify, Select, Store } from '../types';
+import {
+  AddEventConfig,
+  buildProperty,
+  Dispatches,
+  eventToStoreProperty,
+  Prettify,
+  Store,
+  StoreFromRecord
+} from '../types';
 import { createStore } from '../store';
 import {
-  closeMessages,
   CloseMessages,
+  closeMessages,
   jsonStringify,
   log,
   parseEventData,
-  socketStatus,
   SocketStatus,
+  socketStatus,
   toCamelCase
 } from '../utils';
 
-interface AddEventConfig<TName, TData, TSelect = TData> {
-  predicate: Predicate<TData>;
-  select?: Select<TData, TSelect>;
-  name: TName;
-}
+const socketProps = [
+  buildProperty<SocketStatus>()({
+    name: 'status',
+    data: 'closed' as const,
+    isArray: false
+  }),
+  buildProperty<Event>()({
+    name: 'error',
+    data: undefined,
+    isArray: false
+  }),
+  buildProperty<CloseMessages>()({
+    name: 'closeMessage',
+    data: undefined,
+    isArray: false
+  })
+];
 
-export interface SocketStore {
-  status: SocketStatus;
-  closeMessage?: CloseMessages | 'Unknown reason';
-  error?: Event;
-}
-
-export class ReactSocket<TEvents extends Record<string, any> = {}> {
-  private predicates: Record<string, Predicate> = {};
-
-  private selects: Record<string, Select> = {};
+export class ReactSocket<TEvents extends Record<string, AddEventConfig> = {}> {
+  private events = {} as TEvents;
 
   private readonly verbose: boolean;
 
@@ -41,18 +53,24 @@ export class ReactSocket<TEvents extends Record<string, any> = {}> {
     this.verbose = verbose ?? false;
   }
 
-  addEvent<TName extends string, TData, TSelect = TData>(
-    config: AddEventConfig<TName, TData, TSelect>
-  ) {
-    this.predicates[config.name] = config.predicate;
-    if (config.select) this.selects[config.name] = config.select;
+  addEvent<
+    TName extends string,
+    TData,
+    TSelect = TData,
+    TArray extends boolean = false
+  >(config: AddEventConfig<TName, TData, TSelect, TArray>) {
+    // need this as typescript doesn't understand
+    this.events[config.name] = config as any;
     return this as unknown as ReactSocket<
-      Prettify<Record<TName, TSelect> & TEvents>
+      Prettify<
+        Record<TName, AddEventConfig<TName, TData, TSelect, TArray>> & TEvents
+      >
     >;
   }
 
   private getData(eventName: string, data: unknown): unknown {
-    const selectFunc = this.selects[eventName as keyof typeof this.selects];
+    const selectFunc =
+      this.events[eventName as keyof typeof this.events]?.select;
     if (!selectFunc) {
       if (this.verbose) log('info', 'No select function for event:', eventName);
       return data;
@@ -64,16 +82,17 @@ export class ReactSocket<TEvents extends Record<string, any> = {}> {
 
   private onMessage(
     event: MessageEvent,
-    dispatches: Dispatches<Store<TEvents>>
+    dispatches: Dispatches<Record<string, unknown>>
   ) {
-    const eventMap = Object.entries(this.predicates).map(
-      ([eventName, predicate]) => ({ eventName, predicate })
-    );
+    const eventMap = Object.entries(this.events).map(([eventName, config]) => ({
+      eventName,
+      config
+    }));
 
     for (let i = 0; i < eventMap.length; i++) {
-      const { eventName, predicate } = eventMap[i];
+      const { eventName, config } = eventMap[i];
       const parsed = parseEventData(event.data);
-      if (!predicate(parsed)) continue;
+      if (!config.predicate(parsed)) continue;
 
       const data = this.getData(eventName, parsed);
 
@@ -90,8 +109,8 @@ export class ReactSocket<TEvents extends Record<string, any> = {}> {
 
   private registerSocketEvents(
     socket: WebSocket,
-    eventDispatches: Dispatches<Store<TEvents>>,
-    socketDispatches: Dispatches<Store<SocketStore>>
+    eventDispatches: Dispatches<Record<string, unknown>>,
+    socketDispatches: Dispatches<Store<typeof socketProps>>
   ) {
     socket.onopen = () => {
       if (this.verbose) log('info', `Connected to socket`);
@@ -124,27 +143,31 @@ export class ReactSocket<TEvents extends Record<string, any> = {}> {
   }
 
   private initSocket(
-    eventDispatches: Dispatches<Store<TEvents>>,
-    socketDispatches: Dispatches<Store<SocketStore>>
+    eventDispatches: Dispatches<Record<string, unknown>>,
+    socketDispatches: Dispatches<Store<typeof socketProps>>
   ) {
     this.socket = new WebSocket(this.address);
     this.registerSocketEvents(this.socket, eventDispatches, socketDispatches);
   }
 
   build() {
-    const [eventHooks, eventDispatches] = createStore<TEvents>(
-      Object.keys(this.predicates)
+    const eventProps = Object.entries(this.events).map(([, config]) =>
+      buildProperty()({
+        name: config.name,
+        isArray: config.array ?? false,
+        data: undefined
+      })
     );
 
-    const [socketHooks, socketDispatches] = createStore<SocketStore>([
-      'error',
-      'status',
-      'closeMessage'
-    ]);
+    const [eventHooks, eventDispatches] = createStore(eventProps);
+
+    const [socketHooks, socketDispatches] = createStore(socketProps);
 
     this.initSocket(eventDispatches, socketDispatches);
 
-    return [
+    return [{}, {} as StoreFromRecord<TEvents>];
+
+    /* return [
       {
         ...socketHooks,
         reconnect: () => {
@@ -165,6 +188,6 @@ export class ReactSocket<TEvents extends Record<string, any> = {}> {
         }
       },
       eventHooks
-    ] as const;
+    ] as const; */
   }
 }

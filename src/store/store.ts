@@ -23,17 +23,17 @@ const buildHooks = <Store extends Record<string, unknown>>(
     return { ...acc, [getterName]: () => useStore((s) => s[keyValue]) };
   }, {} as Hooks<Store>);
 
-export const createStore = <TEvents extends Record<string, any>>(
-  properties: ReadonlyArray<keyof TEvents>
+export const createStore = <Properties extends any[]>(
+  properties: Properties
 ) => {
   const store = properties.reduce(
-    (acc, key) => ({
+    (acc, prop) => ({
       ...acc,
-      [key]: undefined
+      [prop.name]: prop.isArray ? prop.data ?? [] : prop.data
     }),
-    {} as Store<TEvents>
+    {} as Store<Properties>
   );
-  const useStore = create<Store<TEvents>>()(() => ({ ...store }));
+  const useStore = create<Store<Properties>>()(() => ({ ...store }));
 
   const dispatches = buildDispatches(useStore);
   const hooks = buildHooks(useStore);

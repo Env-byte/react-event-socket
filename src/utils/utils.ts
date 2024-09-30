@@ -22,7 +22,9 @@ export const closeMessages = {
   1011: 'A server is terminating the connection because it encountered an unexpected condition that prevented it from fulfilling the request.',
   1015: "The connection was closed due to a failure to perform a TLS handshake (e.g., the server certificate can't be verified)."
 } as const;
-export type CloseMessages = (typeof closeMessages)[keyof typeof closeMessages];
+export type CloseMessages =
+  | (typeof closeMessages)[keyof typeof closeMessages]
+  | 'Unknown reason';
 
 export const socketStatus = {
   1: 'open',
