@@ -2,10 +2,10 @@ import {
   AddEventConfig,
   buildProperty,
   Dispatches,
-  eventToStoreProperty,
+  EventDispatches,
   Prettify,
-  Store,
-  StoreFromRecord
+  PropsFromEventRecord,
+  StoreFromArray
 } from '../types';
 import { createStore } from '../store';
 import {
@@ -80,10 +80,7 @@ export class ReactSocket<TEvents extends Record<string, AddEventConfig> = {}> {
     return res;
   }
 
-  private onMessage(
-    event: MessageEvent,
-    dispatches: Dispatches<Record<string, unknown>>
-  ) {
+  private onMessage(event: MessageEvent, dispatches: EventDispatches<TEvents>) {
     const eventMap = Object.entries(this.events).map(([eventName, config]) => ({
       eventName,
       config
@@ -109,8 +106,8 @@ export class ReactSocket<TEvents extends Record<string, AddEventConfig> = {}> {
 
   private registerSocketEvents(
     socket: WebSocket,
-    eventDispatches: Dispatches<Record<string, unknown>>,
-    socketDispatches: Dispatches<Store<typeof socketProps>>
+    eventDispatches: EventDispatches<TEvents>,
+    socketDispatches: Dispatches<StoreFromArray<typeof socketProps>>
   ) {
     socket.onopen = () => {
       if (this.verbose) log('info', `Connected to socket`);
@@ -143,8 +140,8 @@ export class ReactSocket<TEvents extends Record<string, AddEventConfig> = {}> {
   }
 
   private initSocket(
-    eventDispatches: Dispatches<Record<string, unknown>>,
-    socketDispatches: Dispatches<Store<typeof socketProps>>
+    eventDispatches: EventDispatches<TEvents>,
+    socketDispatches: Dispatches<StoreFromArray<typeof socketProps>>
   ) {
     this.socket = new WebSocket(this.address);
     this.registerSocketEvents(this.socket, eventDispatches, socketDispatches);
@@ -159,15 +156,15 @@ export class ReactSocket<TEvents extends Record<string, AddEventConfig> = {}> {
       })
     );
 
-    const [eventHooks, eventDispatches] = createStore(eventProps);
+    const [eventHooks, eventDispatches] = createStore(
+      eventProps as PropsFromEventRecord<TEvents>
+    );
 
     const [socketHooks, socketDispatches] = createStore(socketProps);
 
     this.initSocket(eventDispatches, socketDispatches);
 
-    return [{}, {} as StoreFromRecord<TEvents>];
-
-    /* return [
+    return [
       {
         ...socketHooks,
         reconnect: () => {
@@ -188,6 +185,6 @@ export class ReactSocket<TEvents extends Record<string, AddEventConfig> = {}> {
         }
       },
       eventHooks
-    ] as const; */
+    ] as const;
   }
 }

@@ -16,6 +16,8 @@ export type ToCamelCase<T extends string> =
       : `${first}${ToCamelCase<rest>}`
     : '';
 
+export type EventDispatches <T extends Record<string,any>> =  Prettify<Dispatches<StoreFromArray<PropsFromEventRecord<T>>>>
+
 export type Dispatches<T extends Record<string, any>> = {
   [Key in keyof T as `set${Capitalize<ToCamelCase<Extract<Key, string>>>}`]-?: (
     props: T[Key]
@@ -40,13 +42,11 @@ export type StoreFromArray<T extends any[]> = {
     : never;
 };
 
-export type StoreFromRecord<T extends Record<string, any>> = {
-  [K in keyof T]: K extends AddEventConfig<any, any, infer TData, infer TArray>
-    ? TArray extends true
-      ? Exclude<TData, undefined>[]
-      : TData
+export type PropsFromEventRecord<T extends Record<string, any>> = Array<{
+  [K in keyof T]: T[K] extends AddEventConfig<infer TName, any, infer TData, infer TArray>
+    ? StoreProperty<TName, TArray, TData>
     : never;
-};
+}[keyof T]>;
 
 export interface AddEventConfig<
   TName extends string = '',
