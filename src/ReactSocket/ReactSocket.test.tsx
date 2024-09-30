@@ -1,6 +1,6 @@
 import WS from 'jest-websocket-mock';
-import { expect } from 'vitest';
-import { render } from '@testing-library/react';
+import { beforeEach, expect, vi } from 'vitest';
+import { renderHook } from '@testing-library/react';
 import { ReactSocket } from './ReactSocket';
 
 const infoSpy = vi.spyOn(console, 'info');
@@ -23,87 +23,60 @@ const [socket, hooks] = new ReactSocket('ws://localhost:1234', true)
   .build();
 
 describe('Main', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
   it('should handle socket messages', () => {
-    let message: string | undefined;
-
-    function Component() {
-      expect(hooks.useReceivedMessage()).toEqual(message);
-      return null;
-    }
-
-    render(<Component />);
-    message = 'Hello World';
+    const { result } = renderHook(() => hooks.useReceivedMessage());
+    let message = 'Hello World';
     server.send(
       JSON.stringify({ action: 'received-message', data: { message } })
     );
+    expect(result.current).toEqual(message);
     message = 'Hello World 23';
     server.send(
       JSON.stringify({ action: 'received-message', data: { message } })
     );
+    expect(result.current).toEqual(message);
   });
 
   it('should log if event not found', () => {
-    function Component() {
-      return null;
-    }
-
-    render(<Component />);
     server.send(JSON.stringify({ action: 'message', data: { message: '' } }));
     expect(infoSpy).toHaveBeenCalled();
     expect(infoSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Could not find event for data'),
+      'react-event-socket',
+      expect.stringContaining('Could not find event for data:'),
       expect.anything()
     );
   });
 
   it('should log if no select found', () => {
-    let message: object | undefined;
-
-    function Component() {
-      expect(hooks.useJoinedRoom()).toEqual(message);
-      return null;
-    }
-
-    render(<Component />);
-    message = { action: 'joined-room', data: { message: '' } };
     server.send(
       JSON.stringify({ action: 'joined-room', data: { message: '' } })
     );
     expect(infoSpy).toHaveBeenCalled();
     expect(infoSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Could not find Select function for event'),
+      'react-event-socket',
+
+      expect.stringContaining('No select function for event:'),
       expect.anything()
     );
   });
 
   describe('socket statuses', () => {
-    it('should handle open status', () => {
-      function Component() {
-        const status = socket.useStatus();
-        const closeMessage = socket.useCloseMessage();
-        console.log(status, closeMessage);
-        return null;
-      }
-
-      render(<Component />);
+    it('should handle connecting status', () => {
+      const { result } = renderHook(() => socket.useStatus());
       socket.disconnect();
       socket.reconnect();
+      expect(result.current).toEqual('connecting');
     });
 
     it('should handle close status', () => {
-      let message: string;
-
-      function Component() {
-        const closeMessage = socket.useCloseMessage();
-        expect(closeMessage).toEqual(message);
-        return null;
-      }
-
-      render(<Component />);
-
-      message =
-        'Normal closure, meaning that the purpose for which the connection was established has been fulfilled.';
+      const { result } = renderHook(() => socket.useCloseMessage());
       server.close();
+      expect(result.current).toEqual(
+        'Normal closure, meaning that the purpose for which the connection was established has been fulfilled.'
+      );
     });
   });
 });
