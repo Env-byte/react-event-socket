@@ -1,5 +1,3 @@
-import { CloseMessages, SocketStatus } from './utils';
-
 export type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};
@@ -16,7 +14,9 @@ export type ToCamelCase<T extends string> =
       : `${first}${ToCamelCase<rest>}`
     : '';
 
-export type EventDispatches <T extends Record<string,any>> =  Prettify<Dispatches<StoreFromArray<PropsFromEventRecord<T>>>>
+export type EventDispatches<T extends Record<string, any>> = Prettify<
+  Dispatches<StoreFromArray<PropsFromEventRecord<T>>>
+>;
 
 export type Dispatches<T extends Record<string, any>> = {
   [Key in keyof T as `set${Capitalize<ToCamelCase<Extract<Key, string>>>}`]-?: (
@@ -42,11 +42,18 @@ export type StoreFromArray<T extends any[]> = {
     : never;
 };
 
-export type PropsFromEventRecord<T extends Record<string, any>> = Array<{
-  [K in keyof T]: T[K] extends AddEventConfig<infer TName, any, infer TData, infer TArray>
-    ? StoreProperty<TName, TArray, TData>
-    : never;
-}[keyof T]>;
+export type PropsFromEventRecord<T extends Record<string, any>> = Array<
+  {
+    [K in keyof T]: T[K] extends AddEventConfig<
+      infer TName,
+      any,
+      infer TData,
+      infer TArray
+    >
+      ? StoreProperty<TName, TArray, TData>
+      : never;
+  }[keyof T]
+>;
 
 export interface AddEventConfig<
   TName extends string = '',
@@ -58,12 +65,6 @@ export interface AddEventConfig<
   select?: Select<TData, TSelect>;
   name: TName;
   array?: TArray;
-}
-
-export interface SocketStore {
-  status: SocketStatus;
-  closeMessage?: CloseMessages | 'Unknown reason';
-  error?: Event;
 }
 
 export interface StoreProperty<

@@ -35,14 +35,20 @@ describe('Main', () => {
   });
   it('should handle socket messages', () => {
     const { result } = renderHook(() => hooks.useReceivedMessage()); // this should just be string[]
-    let message = 'Hello World';
+    const message = ['Hello World'];
     server.send(
-      JSON.stringify({ action: 'received-message', data: { message } })
+      JSON.stringify({
+        action: 'received-message',
+        data: { message: 'Hello World' }
+      })
     );
     expect(result.current).toEqual(message);
-    message = 'Hello World 23';
+    message.push('Hello World 23');
     server.send(
-      JSON.stringify({ action: 'received-message', data: { message } })
+      JSON.stringify({
+        action: 'received-message',
+        data: { message: 'Hello World 23' }
+      })
     );
     expect(result.current).toEqual(message);
   });
