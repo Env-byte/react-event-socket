@@ -37,7 +37,12 @@ const socketProps = [
   })
 ];
 
-export class ReactSocket<TEvents extends Record<string, AddEventConfig> = {}> {
+export class ReactSocket<
+  TEvents extends Record<string, AddEventConfig> = {},
+  TSendPayloads extends Record<string, any>
+> {
+  private payloadNames = [] as Array<keyof TSendPayloads>;
+
   private events = {} as TEvents;
 
   private readonly verbose: boolean;
@@ -64,8 +69,19 @@ export class ReactSocket<TEvents extends Record<string, AddEventConfig> = {}> {
     return this as unknown as ReactSocket<
       Prettify<
         Record<TName, AddEventConfig<TName, TData, TSelect, TArray>> & TEvents
-      >
+      >,
+      TSendPayloads
     >;
+  }
+
+  addSend<TData>() {
+    return <TName extends string>(name: TName) => {
+      this.payloadNames.push(name);
+      return this as unknown as ReactSocket<
+        TEvents,
+        Record<TName, TData> & TSendPayloads
+      >;
+    };
   }
 
   private getData(eventName: string, data: unknown): unknown {
@@ -164,6 +180,7 @@ export class ReactSocket<TEvents extends Record<string, AddEventConfig> = {}> {
 
     this.initSocket(eventDispatches, socketDispatches);
 
+    // todo export the send functions which are typed
     return [
       {
         ...socketHooks,
