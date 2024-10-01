@@ -14,7 +14,7 @@ In the below example the server is sending a message event with a payload of `{m
 We can set up react-event-socket to listen for this event by using the `addEvent` function and setting the predicate to identify this event by the payload. We can do this via `'message' in data`.
 ```tsx
 //service.ts
-import {ReactSocket} from "../../react-socket/dist";
+import {ReactSocket} from "react-event-socket";
 
 interface MessageEvent {
     userId: number,

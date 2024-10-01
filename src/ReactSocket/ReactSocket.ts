@@ -1,14 +1,14 @@
 import {
   AddEventConfig,
-  buildProperty,
   Dispatches,
   EventDispatches,
   Prettify,
-  PropsFromEventRecord,
+  StorePropertiesFromEventRecord,
   StoreFromArray
 } from '../types';
 import { createStore } from '../store';
 import {
+  buildProperty,
   CloseMessages,
   closeMessages,
   jsonStringify,
@@ -157,7 +157,7 @@ export class ReactSocket<TEvents extends Record<string, AddEventConfig> = {}> {
     );
 
     const [eventHooks, eventDispatches] = createStore(
-      eventProps as PropsFromEventRecord<TEvents>
+      eventProps as StorePropertiesFromEventRecord<TEvents>
     );
 
     const [socketHooks, socketDispatches] = createStore(socketProps);

@@ -1,3 +1,5 @@
+import { StoreProperty } from '../types.ts';
+
 export const upperCaseFirstCharacter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -51,3 +53,10 @@ export const jsonStringify = (payload: unknown) => {
   }
   return false;
 };
+
+export const buildProperty =
+  <TData>() =>
+  <TName extends string, TInitial, TArray extends boolean>(
+    props: StoreProperty<TName, TArray, TData | TInitial>
+  ) =>
+    props;

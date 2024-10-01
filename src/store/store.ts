@@ -62,7 +62,9 @@ export const createStore = <Properties extends any[]>(
     }),
     {} as StoreFromArray<Properties>
   );
-  const useStore = create<StoreFromArray<Properties>>()(() => ({ ...store }));
+  const useStore = create<StoreFromArray<Properties>>()(() => ({
+    ...store
+  }));
 
   const dispatches = buildDispatches(useStore, properties);
   const hooks = buildHooks(useStore);

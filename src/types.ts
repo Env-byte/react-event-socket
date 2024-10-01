@@ -4,7 +4,7 @@ export type Prettify<T> = {
 
 export type Predicate<TData = any> = (data: TData) => boolean;
 export type Select<TData = any, TSelect = TData> = (data: TData) => TSelect;
-
+export type RecordToArray<T extends Record<string, any>> = Array<T[keyof T]>;
 type IsDash<T extends string> = T extends `-` ? true : false;
 
 export type ToCamelCase<T extends string> =
@@ -15,19 +15,17 @@ export type ToCamelCase<T extends string> =
     : '';
 
 export type EventDispatches<T extends Record<string, any>> = Prettify<
-  Dispatches<StoreFromArray<PropsFromEventRecord<T>>>
+  Dispatches<StoreFromArray<StorePropertiesFromEventRecord<T>>>
 >;
 
 export type Dispatches<T extends Record<string, any>> = {
   [Key in keyof T as `set${Capitalize<ToCamelCase<Extract<Key, string>>>}`]-?: (
-    props: T[Key]
+    props: Exclude<T[Key], undefined>
   ) => void;
 };
 
 export type Hooks<T extends Record<string, any>> = {
-  [Key in keyof T as `use${Capitalize<ToCamelCase<Extract<Key, string>>>}`]-?: () =>
-    | T[Key]
-    | undefined;
+  [Key in keyof T as `use${Capitalize<ToCamelCase<Extract<Key, string>>>}`]-?: () => T[Key];
 };
 
 export type StoreFromArray<T extends any[]> = {
@@ -42,18 +40,17 @@ export type StoreFromArray<T extends any[]> = {
     : never;
 };
 
-export type PropsFromEventRecord<T extends Record<string, any>> = Array<
-  {
+export type StorePropertiesFromEventRecord<T extends Record<string, any>> =
+  RecordToArray<{
     [K in keyof T]: T[K] extends AddEventConfig<
       infer TName,
       any,
       infer TData,
       infer TArray
     >
-      ? StoreProperty<TName, TArray, TData>
+      ? StoreProperty<TName, TArray, TData | undefined>
       : never;
-  }[keyof T]
->;
+  }>;
 
 export interface AddEventConfig<
   TName extends string = '',
@@ -76,10 +73,3 @@ export interface StoreProperty<
   data: TData;
   isArray: TArray;
 }
-
-export const buildProperty =
-  <TData>() =>
-  <TName extends string, TInitial, TArray extends boolean>(
-    props: StoreProperty<TName, TArray, TData | TInitial>
-  ) =>
-    props;
