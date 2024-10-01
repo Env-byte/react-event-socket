@@ -6,7 +6,6 @@
     "prettier"
   ],
   "rules": {
-    "no-console": "off",
     "no-plusplus": "off",
     "no-continue": "off",
     "no-param-reassign": "off",
