@@ -1,5 +1,5 @@
 import WS from 'jest-websocket-mock';
-import { beforeEach, expect, vi } from 'vitest';
+import { beforeEach, describe, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { ReactSocket } from './ReactSocket';
 
@@ -27,13 +27,16 @@ const [socket, hooks] = new ReactSocket('ws://localhost:1234', true)
     name: 'joined-room',
     predicate: (data: JoinedRoom) => data.action === 'joined-room'
   })
+  //
+  .addPayload<{ message: string }>()('message')
+  .addPayload<{ channel: string }>()('join')
   .build();
 
 describe('Main', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
-  it('should handle socket messages', () => {
+  test('should handle socket messages', () => {
     const { result } = renderHook(() => hooks.useReceivedMessage()); // this should just be string[]
     const message = ['Hello World'];
     server.send(
@@ -53,7 +56,7 @@ describe('Main', () => {
     expect(result.current).toEqual(message);
   });
 
-  it('should log if event not found', () => {
+  test('should log if event not found', () => {
     server.send(JSON.stringify({ action: 'message', data: { message: '' } }));
     expect(infoSpy).toHaveBeenCalled();
     expect(infoSpy).toHaveBeenCalledWith(
@@ -63,7 +66,7 @@ describe('Main', () => {
     );
   });
 
-  it('should log if no select found', () => {
+  test('should log if no select found', () => {
     server.send(
       JSON.stringify({ action: 'joined-room', data: { message: '' } })
     );
@@ -77,19 +80,26 @@ describe('Main', () => {
   });
 
   describe('socket statuses', () => {
-    it('should handle connecting status', () => {
+    test('should handle connecting status', () => {
       const { result } = renderHook(() => socket.useStatus());
       socket.disconnect();
       socket.reconnect();
       expect(result.current).toEqual('connecting');
     });
 
-    it('should handle close status', () => {
+    test('should handle close status', () => {
       const { result } = renderHook(() => socket.useCloseMessage());
       server.close();
       expect(result.current).toEqual(
         'Normal closure, meaning that the purpose for which the connection was established has been fulfilled.'
       );
+    });
+  });
+
+  describe('should have named send functions', () => {
+    test('should have sendMessage and sendJoin', () => {
+      expect(socket).toHaveProperty('sendMessage');
+      expect(socket).toHaveProperty('sendJoin');
     });
   });
 });

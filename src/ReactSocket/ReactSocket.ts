@@ -4,7 +4,9 @@ import {
   EventDispatches,
   Prettify,
   StorePropertiesFromEventRecord,
-  StoreFromArray
+  StoreFromArray,
+  SendPayloads,
+  SendPayloadsUnion
 } from '../types';
 import { createStore } from '../store';
 import {
@@ -39,7 +41,7 @@ const socketProps = [
 
 export class ReactSocket<
   TEvents extends Record<string, AddEventConfig> = {},
-  TSendPayloads extends Record<string, any>
+  TSendPayloads extends Record<string, any> = {}
 > {
   private payloadNames = [] as Array<keyof TSendPayloads>;
 
@@ -64,7 +66,6 @@ export class ReactSocket<
     TSelect = TData,
     TArray extends boolean = false
   >(config: AddEventConfig<TName, TData, TSelect, TArray>) {
-    // need this as typescript doesn't understand
     this.events[config.name] = config as any;
     return this as unknown as ReactSocket<
       Prettify<
@@ -74,7 +75,7 @@ export class ReactSocket<
     >;
   }
 
-  addSend<TData>() {
+  addPayload<TData>() {
     return <TName extends string>(name: TName) => {
       this.payloadNames.push(name);
       return this as unknown as ReactSocket<
@@ -163,6 +164,18 @@ export class ReactSocket<
     this.registerSocketEvents(this.socket, eventDispatches, socketDispatches);
   }
 
+  private buildPayloadNames() {
+    return this.payloadNames.reduce((accumulator, next) => {
+      const send = (payload: unknown) => {
+        const data =
+          typeof payload !== 'string' ? jsonStringify(payload) : payload;
+        if (data === false) return;
+        this.socket?.send(data);
+      };
+      return { ...accumulator, [`send${toCamelCase(String(next))}`]: send };
+    }, {} as SendPayloads<TSendPayloads>);
+  }
+
   build() {
     const eventProps = Object.entries(this.events).map(([, config]) =>
       buildProperty()({
@@ -180,10 +193,12 @@ export class ReactSocket<
 
     this.initSocket(eventDispatches, socketDispatches);
 
-    // todo export the send functions which are typed
+    const sends = this.buildPayloadNames();
+
     return [
       {
         ...socketHooks,
+        ...sends,
         reconnect: () => {
           if (this.verbose) log('info', 'Reconnecting to socket');
           this.socket?.close();
@@ -193,7 +208,7 @@ export class ReactSocket<
           if (this.verbose) log('info', 'Disconnecting from socket');
           this.socket?.close();
         },
-        send: (payload: unknown) => {
+        send: (payload: SendPayloadsUnion<TSendPayloads>) => {
           const data =
             typeof payload !== 'string' ? jsonStringify(payload) : payload;
           if (data === false) return;

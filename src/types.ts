@@ -18,6 +18,16 @@ export type EventDispatches<T extends Record<string, any>> = Prettify<
   Dispatches<StoreFromArray<StorePropertiesFromEventRecord<T>>>
 >;
 
+export type SendPayloads<T extends Record<string, any>> = Prettify<{
+  [Key in keyof T as `send${Capitalize<ToCamelCase<Extract<Key, string>>>}`]: (
+    payload: T[Key]
+  ) => void;
+}>;
+
+export type SendPayloadsUnion<T extends Record<string, any>> = Prettify<{
+  [Key in keyof T]: T[Key];
+}[keyof T]>;
+
 export type Dispatches<T extends Record<string, any>> = {
   [Key in keyof T as `set${Capitalize<ToCamelCase<Extract<Key, string>>>}`]-?: (
     props: Exclude<T[Key], undefined>
