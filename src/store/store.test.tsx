@@ -1,26 +1,33 @@
 import { expect } from 'vitest';
-import { act, render } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { createStore } from './store';
+import { CloseMessages, SocketStatus, buildProperty } from '../utils';
+
+const socketProps = [
+  buildProperty<SocketStatus>()({
+    name: 'status',
+    data: 'closed' as const,
+    isArray: false
+  }),
+  buildProperty<Event>()({
+    name: 'error',
+    data: undefined,
+    isArray: false
+  }),
+  buildProperty<CloseMessages>()({
+    name: 'closeMessage',
+    data: undefined,
+    isArray: false
+  })
+];
+const [hooks, dispatches] = createStore(socketProps);
 
 describe('Store', () => {
-    test('Should create store from key', () => {
-        const keys = ['name', 'age'] as const;
-        type Store = Record<(typeof keys)[number], string>;
-        const [hooks, dispatches] = createStore<Store>(keys);
-        let name: string | undefined;
-
-        function Component() {
-            expect(hooks.useName()).toEqual(name);
-            const age = hooks.useAge();
-            console.info('Name:', name, age);
-            return null;
-        }
-
-        render(<Component />);
-        name = 'John Doe';
-        act(() => {
-            dispatches.setName(name);
-            dispatches.setAge('26');
-        });
+  test('Should create store from key', () => {
+    const { result } = renderHook(() => hooks.useStatus());
+    act(() => {
+      dispatches.setStatus('closed');
     });
+    expect(result.current).toEqual('closed');
+  });
 });
