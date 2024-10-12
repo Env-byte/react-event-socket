@@ -1,8 +1,7 @@
 import { expect } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { createStore } from './store';
-import { buildProperty } from '../types';
-import { CloseMessages, SocketStatus } from '../utils';
+import { CloseMessages, SocketStatus, buildProperty } from '../utils';
 
 const socketProps = [
   buildProperty<SocketStatus>()({
