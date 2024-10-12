@@ -208,7 +208,11 @@ export class ReactSocket<
           if (this.verbose) log('info', 'Disconnecting from socket');
           this.socket?.close();
         },
-        send: (payload: SendPayloadsUnion<TSendPayloads>) => {
+        send: (
+          payload: SendPayloadsUnion<TSendPayloads> extends never
+            ? unknown
+            : SendPayloadsUnion<TSendPayloads>
+        ) => {
           const data =
             typeof payload !== 'string' ? jsonStringify(payload) : payload;
           if (data === false) return;
