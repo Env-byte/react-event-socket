@@ -33,6 +33,14 @@ const socketProps = [
 type SocketStore = StoreFromArray<typeof socketProps>;
 type EventDispatch = Record<string, (value: any) => void>;
 
+interface SocketProps<TEvents, TSendNames> {
+    address: string;
+    events: TEvents;
+    eventDispatches: EventDispatch;
+    sendNames: TSendNames;
+    verbose: boolean;
+}
+
 export class Socket<
     TEvents extends Record<string, AddEventConfig> = {},
     TSendNames extends Record<string, SendNameConfig<string, any>> = {}
@@ -53,7 +61,7 @@ export class Socket<
 
     private sendNames: TSendNames;
 
-    constructor(address: string, events: TEvents, eventDispatches: EventDispatch, sendNames: TSendNames, verbose: boolean) {
+    constructor({ address, sendNames, verbose, events, eventDispatches }: SocketProps<TEvents, TSendNames>) {
         this.verbose = verbose;
         this.address = address;
         this.events = events;
