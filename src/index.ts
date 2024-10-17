@@ -1,2 +1,2 @@
-export { ReactSocket } from './ReactSocket/ReactSocket';
+export { ReactEventSocket } from './ReactEventSocket';
 export * from './types';
