@@ -1,2 +1,2 @@
-export { SendMessage } from './ReactSocket/SendMessage.ts';
+export { ReactEventSocket } from './ReactEventSocket';
 export * from './types';

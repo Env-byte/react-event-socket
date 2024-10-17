@@ -1,8 +1,7 @@
-import { ReceivedMessage } from './ReceivedMessage';
-
-import { Socket } from './Socket';
-import { SendMessage } from './SendMessage';
-import { SendNameConfig } from '../types';
+import { ReceivedMessage } from './Classes/ReceivedMessage';
+import { Socket } from './Classes/Socket';
+import { SendMessage } from './Classes/SendMessage';
+import { SendNameConfig } from './types';
 
 export class ReactEventSocket<
     TReceivedMessage extends Record<string, any> = {},
@@ -37,13 +36,16 @@ export class ReactEventSocket<
 
     build() {
         const [eventHooks, eventDispatches] = this.receivedMessage.events;
-        const socket = new Socket(
-            this.address,
-            this.receivedMessage.config,
+        const events = this.receivedMessage.config;
+        const { sendNames } = this.sendMessage;
+        const socket = new Socket({
+            address: this.address,
+            events,
+            sendNames,
             eventDispatches,
-            this.sendMessage.sendNames,
-            this.verbose ?? false
-        );
+            verbose: this.verbose
+        });
+
         socket.init();
         return [socket.hooks, eventHooks] as const;
     }

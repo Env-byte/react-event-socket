@@ -13,9 +13,11 @@ export type ToCamelCase<T extends string> = T extends `${infer first}${infer res
         : `${first}${ToCamelCase<rest>}`
     : '';
 
-export type SendPayloads<T extends Record<string, any>> = Prettify<{
-    [Key in keyof T as `send${Capitalize<ToCamelCase<Extract<Key, string>>>}`]: (payload: Exclude<T[Key]['data'], undefined>) => void;
-}>;
+export type SendPayloads<T extends Record<string, any>> = {
+    [Key in keyof T as `send${Capitalize<ToCamelCase<Extract<Key, string>>>}`]: T[Key] extends SendNameConfig<any, infer Data>
+        ? (payload: Data) => void
+        : never;
+};
 
 export type Dispatches<T extends Record<string, any>> = {
     [Key in keyof T as `set${Capitalize<ToCamelCase<Extract<Key, string>>>}`]-?: (props: Exclude<T[Key], undefined>) => void;
@@ -25,7 +27,7 @@ export type Hooks<T extends Record<string, any>> = {
     [Key in keyof T as `use${Capitalize<ToCamelCase<Extract<Key, string>>>}`]-?: () => T[Key];
 };
 
-export type StoreFromArray<T extends any[]> = {
+export type GetStore<T extends any[]> = {
     [K in T[number] as K['name']]: K extends StoreProperty<any, infer TArray, infer TData>
         ? TArray extends true
             ? Exclude<TData, undefined>[]
@@ -33,7 +35,7 @@ export type StoreFromArray<T extends any[]> = {
         : never;
 };
 
-export type StorePropertiesFromEventRecord<T extends Record<string, any>> = RecordToArray<{
+export type GetStoreProperties<T extends Record<string, any>> = RecordToArray<{
     [K in keyof T]: T[K] extends AddEventConfig<infer TName, any, infer TData, infer TArray>
         ? StoreProperty<TName, TArray, TData | undefined>
         : never;
@@ -52,7 +54,9 @@ export interface StoreProperty<TName extends string, TArray extends boolean, TDa
     isArray: TArray;
 }
 
+export type Middleware<TData = any> = (props: { name: string; data: TData }) => unknown;
+
 export interface SendNameConfig<TName extends string, TData> {
     name: TName;
-    data?: TData;
+    middleware?: Array<Middleware<TData>>;
 }

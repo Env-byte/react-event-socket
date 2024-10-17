@@ -1,6 +1,6 @@
 import { SendNameConfig } from '../types';
 
-export class SendMessage<TSendName extends Record<string, SendNameConfig<any, any>>> {
+export class SendMessage<TSendName extends Record<string, any> = {}> {
     private _sendNames = {} as TSendName;
 
     addPayload<TData>() {

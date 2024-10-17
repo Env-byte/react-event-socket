@@ -1,5 +1,5 @@
 import { create, StoreApi, UseBoundStore } from 'zustand';
-import { Dispatches, Hooks, StoreFromArray, StoreProperty } from '../types';
+import { Dispatches, Hooks, Prettify, GetStore, StoreProperty } from '../types';
 import { toCamelCase } from '../utils';
 
 const createDispatch = <Store extends Record<string, unknown>>(
@@ -32,11 +32,14 @@ const buildDispatches = <Store extends Record<string, unknown>>(
     }, {} as Dispatches<Store>);
 
 const buildHooks = <Store extends Record<string, unknown>>(useStore: UseBoundStore<StoreApi<Store>>) =>
-    Object.keys(useStore.getState()).reduce((acc, key) => {
-        const keyValue = key as keyof Store;
-        const getterName = `use${toCamelCase(key)}`;
-        return { ...acc, [getterName]: () => useStore((s) => s[keyValue]) };
-    }, {} as Hooks<Store>);
+    Object.keys(useStore.getState()).reduce(
+        (acc, key) => {
+            const keyValue = key as keyof Store;
+            const getterName = `use${toCamelCase(key)}`;
+            return { ...acc, [getterName]: () => useStore((s) => s[keyValue]) };
+        },
+        {} as Prettify<Hooks<Store>>
+    );
 
 export const createStore = <Properties extends any[]>(properties: Properties) => {
     const store = properties.reduce(
@@ -44,14 +47,14 @@ export const createStore = <Properties extends any[]>(properties: Properties) =>
             ...acc,
             [prop.name]: prop.isArray ? prop.data ?? [] : prop.data
         }),
-        {} as StoreFromArray<Properties>
-    );
-    const useStore = create<StoreFromArray<Properties>>()(() => ({
+        {}
+    ) as GetStore<Properties>;
+    const useStore = create<GetStore<Properties>>()(() => ({
         ...store
     }));
 
     const dispatches = buildDispatches(useStore, properties);
     const hooks = buildHooks(useStore);
 
-    return [hooks, dispatches] as const;
+    return [hooks, dispatches, useStore] as const;
 };

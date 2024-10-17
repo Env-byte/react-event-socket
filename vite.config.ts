@@ -4,10 +4,7 @@ import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig(({ command }) => {
-    const plugins =
-        command === 'serve'
-            ? [react()]
-            : [dts({ tsconfigPath: './tsconfig.app.json', rollupTypes: true })];
+    const plugins = command === 'serve' ? [react()] : [dts({ tsconfigPath: './tsconfig.app.json', rollupTypes: true })];
     return {
         plugins,
         test: {
@@ -17,9 +14,9 @@ export default defineConfig(({ command }) => {
                 provider: 'istanbul',
                 reporter: ['json', 'json-summary'],
                 reportsDirectory: './coverage',
-                include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
-                exclude: ['node_modules/**', 'dist/**', 'build/**'],
-            },
+                include: ['src/**'],
+                exclude: ['node_modules/**', 'dist/**', 'build/**', 'src/**/*.test.tsx']
+            }
         },
         build: {
             lib: {
@@ -27,7 +24,7 @@ export default defineConfig(({ command }) => {
                 entry: resolve(__dirname, 'src/index.ts'),
                 name: 'index',
                 // the proper extensions will be added
-                fileName: 'index',
+                fileName: 'index'
             },
             rollupOptions: {
                 // make sure to externalize deps that shouldn't be bundled
@@ -37,10 +34,10 @@ export default defineConfig(({ command }) => {
                     // Provide global variables to use in the UMD build
                     // for externalized deps
                     globals: {
-                        react: 'React',
-                    },
-                },
-            },
-        },
+                        react: 'React'
+                    }
+                }
+            }
+        }
     };
 });
