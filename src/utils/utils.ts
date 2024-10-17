@@ -1,4 +1,4 @@
-import { StorePropertiesFromEventRecord, StoreProperty } from '../types.ts';
+import { Middleware, StoreProperty } from '../types';
 
 export const upperCaseFirstCharacter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -30,9 +30,9 @@ export const socketStatus = {
 } as const;
 export type SocketStatus = (typeof socketStatus)[keyof typeof socketStatus];
 
-export const log = (type: 'info' | 'error', message: string, data?: unknown) => {
+export const log = (type: 'info' | 'error', ...data: unknown[]) => {
     // eslint-disable-next-line no-console
-    console[type](`react-event-socket`, message, data);
+    console[type](`react-event-socket`, ...data);
 };
 
 export const jsonStringify = (payload: unknown) => {
@@ -49,12 +49,9 @@ export const buildProperty =
     <TName extends string, TInitial, TArray extends boolean>(props: StoreProperty<TName, TArray, TData | TInitial>) =>
         props;
 
-export const recordToPropertyArray = <T extends Record<string, any>>(events: T) => {
-    return Object.entries(events).map(([, config]) =>
-        buildProperty()({
-            name: config.name,
-            isArray: config.array ?? false,
-            data: undefined
-        })
-    ) as StorePropertiesFromEventRecord<T>;
+export const executeMiddleware = <TMiddleware extends Middleware[]>(name: string, data: any, middleware: TMiddleware) => {
+    return middleware.reduce((prev, next) => {
+        log('info', 'executing', next.name, 'with', prev);
+        return next({ name, data: prev });
+    }, data);
 };

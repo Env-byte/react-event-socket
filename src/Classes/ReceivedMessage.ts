@@ -1,4 +1,4 @@
-import { AddEventConfig, Prettify, StorePropertiesFromEventRecord } from '../types';
+import { AddEventConfig, Prettify, GetStoreProperties } from '../types';
 import { buildProperty } from '../utils';
 import { createStore } from '../store';
 
@@ -20,10 +20,10 @@ export class ReceivedMessage<TEvents extends Record<string, any> = {}> {
                 data: undefined
             })
         );
-        return createStore(eventProps as StorePropertiesFromEventRecord<TEvents>);
+        return createStore(eventProps as GetStoreProperties<TEvents>);
     }
 
     get config() {
-        return this._events
+        return this._events;
     }
 }

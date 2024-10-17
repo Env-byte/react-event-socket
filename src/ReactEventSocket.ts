@@ -1,8 +1,7 @@
-import { ReceivedMessage } from './ReceivedMessage';
-
-import { Socket } from './Socket';
-import { SendMessage } from './SendMessage';
-import { SendNameConfig } from '../types';
+import { ReceivedMessage } from './Classes/ReceivedMessage';
+import { Socket } from './Classes/Socket';
+import { SendMessage } from './Classes/SendMessage';
+import { SendNameConfig } from './types';
 
 export class ReactEventSocket<
     TReceivedMessage extends Record<string, any> = {},

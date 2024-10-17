@@ -1,8 +1,10 @@
-import { AddEventConfig, Dispatches, Hooks, SendNameConfig, SendPayloads, StoreFromArray } from '../types';
+import { StoreApi, UseBoundStore } from 'zustand';
+import { AddEventConfig, Dispatches, Hooks, SendNameConfig, SendPayloads, GetStore } from '../types';
 import {
     buildProperty,
     closeMessages,
     CloseMessages,
+    executeMiddleware,
     jsonStringify,
     log,
     parseEventData,
@@ -30,7 +32,7 @@ const socketProps = [
     })
 ];
 
-type SocketStore = StoreFromArray<typeof socketProps>;
+type SocketStore = GetStore<typeof socketProps>;
 type EventDispatch = Record<string, (value: any) => void>;
 
 interface SocketProps<TEvents, TSendNames> {
@@ -59,6 +61,8 @@ export class Socket<
 
     private readonly eventDispatches: EventDispatch;
 
+    private readonly useStore: UseBoundStore<StoreApi<SocketStore>>;
+
     private sendNames: TSendNames;
 
     constructor({ address, sendNames, verbose, events, eventDispatches }: SocketProps<TEvents, TSendNames>) {
@@ -66,12 +70,15 @@ export class Socket<
         this.address = address;
         this.events = events;
 
-        const [socketHooks, socketDispatches] = createStore(socketProps);
+        const [socketHooks, socketDispatches, useStore] = createStore(socketProps);
+
         this.socketHooks = socketHooks;
         this.socketDispatches = socketDispatches;
 
         this.eventDispatches = eventDispatches;
         this.sendNames = sendNames;
+
+        this.useStore = useStore;
     }
 
     private registerSocketEvents(socket: WebSocket) {
@@ -137,10 +144,20 @@ export class Socket<
 
     private buildSendNames() {
         return Object.values(this.sendNames).reduce((accumulator, next) => {
-            const send = (payload: unknown) => {
-                const data = typeof payload !== 'string' ? jsonStringify(payload) : payload;
-                if (data === false) return;
-                this.socket?.send(data);
+            const send = (data: unknown) => {
+                if (this.socket?.readyState !== WebSocket.OPEN || !this.socket) {
+                    if (this.verbose) log('info', 'Socket is not open');
+                    return;
+                }
+                const payload = next.middleware ? executeMiddleware(next.name, data, next.middleware) : data;
+                const jsonPayload = typeof payload !== 'string' ? jsonStringify(payload) : payload;
+                if (jsonPayload === false) {
+                    if (this.verbose) log('info', `Did not Send`, payload);
+                    return;
+                }
+                if (this.verbose) log('info', `Sent`, payload);
+
+                this.socket.send(jsonPayload);
             };
             return {
                 ...accumulator,
@@ -157,7 +174,6 @@ export class Socket<
     public get hooks() {
         return {
             ...this.socketHooks,
-            ...this.buildSendNames(),
             reconnect: () => {
                 if (this.verbose) log('info', 'Reconnecting to socket');
                 this.socket?.close();
@@ -167,12 +183,14 @@ export class Socket<
                 if (this.verbose) log('info', 'Disconnecting from socket');
                 this.socket?.close();
             },
+            ...this.buildSendNames(),
             send: (payload: unknown) => {
                 const data = typeof payload !== 'string' ? jsonStringify(payload) : payload;
                 if (data === false) return;
                 if (this.verbose) log('info', 'Sending data:', data);
                 this.socket?.send(data);
-            }
+            },
+            useStore: this.useStore
         };
     }
 }
