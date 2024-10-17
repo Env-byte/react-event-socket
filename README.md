@@ -22,6 +22,11 @@ interface MessageEvent {
     data: { message: string }
 }
 
+interface JoinedRoom {
+    name: string;
+    id: number;
+}
+
 const wrapPayload: Middleware = ({ name, data }) => ({ action: name, data });
 
 const [socket, hooks] = new ReactEventSocket('ws://localhost:1234', true)
@@ -37,7 +42,7 @@ const [socket, hooks] = new ReactEventSocket('ws://localhost:1234', true)
                 array: true,
             })
             .addEvent({
-                name: 'joined-room',
+                name: 'room',
                 predicate: (data: JoinedRoom) => data.action === 'joined-room',
             }),
     )
@@ -56,11 +61,12 @@ const [socket, hooks] = new ReactEventSocket('ws://localhost:1234', true)
 
 ```tsx
 // component.tsx
-import { events, socket } from './service.ts';
+import { hooks, socket } from './service.ts';
 
 function App() {
     const status = socket.useStatus();
-    const messages = events.useReceivedMessage(); // the type of this will match the type returned from the select {name:string, message: string}[]
+    const messages = hooks.useReceivedMessage(); // {name:string, message: string}[], since we put this as an array and used a select
+    const room = hooks.useRoom(); // JoinedRoom
     return <>
         <p>Status: {status}</p>
         <p>latest message: {message}</p>
