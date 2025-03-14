@@ -3,6 +3,12 @@ import { Socket } from './Classes/Socket';
 import { SendMessage } from './Classes/SendMessage';
 import { SendNameConfig } from './types';
 
+interface ReactEventSocketConfig {
+    address: string;
+    verbose?: boolean;
+    initialConnect: boolean;
+}
+
 export class ReactEventSocket<
     TReceivedMessage extends Record<string, any> = {},
     TSendMessage extends Record<string, SendNameConfig<any, any>> = {}
@@ -15,11 +21,15 @@ export class ReactEventSocket<
 
     private readonly verbose: boolean;
 
-    constructor(address: string, verbose?: boolean) {
+    private readonly initialConnect: boolean;
+
+    // optionally don't connect straight away
+    constructor({ address, verbose, initialConnect }: ReactEventSocketConfig) {
         this.receivedMessage = new ReceivedMessage();
         this.sendMessage = new SendMessage();
         this.verbose = verbose ?? false;
         this.address = address;
+        this.initialConnect = initialConnect;
     }
 
     // @ts-ignore
@@ -45,8 +55,7 @@ export class ReactEventSocket<
             eventDispatches,
             verbose: this.verbose
         });
-
-        socket.init();
+        if (this.initialConnect) socket.init();
         return [socket.hooks, eventHooks] as const;
     }
 }

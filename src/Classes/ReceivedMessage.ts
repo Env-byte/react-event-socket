@@ -13,13 +13,14 @@ export class ReceivedMessage<TEvents extends Record<string, any> = {}> {
     }
 
     get events() {
-        const eventProps = Object.entries(this._events).map(([, config]) =>
-            buildProperty()({
+        const eventProps = Object.entries(this._events).map(([, config]) => {
+            const baseObj = {
                 name: config.name,
                 isArray: config.array ?? false,
                 data: undefined
-            })
-        );
+            };
+            return buildProperty()(config.array ? { ...baseObj, size: config.size } : config);
+        });
         return createStore(eventProps as GetStoreProperties<TEvents>);
     }
 
