@@ -166,18 +166,18 @@ export class Socket<
         }, {} as SendPayloads<TSendNames>);
     }
 
-    public init() {
-        this.socket = new WebSocket(this.address);
+    public init(newAddress?: string) {
+        this.socket = new WebSocket(newAddress ?? this.address);
         this.registerSocketEvents(this.socket);
     }
 
     public get hooks() {
         return {
             ...this.socketHooks,
-            reconnect: () => {
+            reconnect: (address?: string) => {
                 if (this.verbose) log('info', 'Reconnecting to socket');
                 this.socket?.close();
-                this.init();
+                this.init(address);
             },
             disconnect: () => {
                 if (this.verbose) log('info', 'Disconnecting from socket');

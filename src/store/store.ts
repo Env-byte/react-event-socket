@@ -7,15 +7,22 @@ const createDispatch = <Store extends Record<string, unknown>>(
     properties: StoreProperty<string, boolean>
 ) => {
     if (!properties.isArray) {
-        return (value: unknown | ((s: unknown) => unknown)) => {
-            useStore.setState({ [properties.name]: value } as any);
+        return (value: unknown) => {
+            useStore.setState({
+                [properties.name]: value
+            } as Partial<Store>);
         };
     }
 
-    return (value: unknown | ((s: unknown) => unknown)) => {
+    return (value: unknown) => {
         const existing = useStore.getState()[properties.name];
         const array = Array.isArray(existing) ? existing : [];
-        useStore.setState({ [properties.name]: [...array, value] } as any);
+        let newArray = [...array, value];
+        if (properties.size && newArray.length > properties.size) {
+            newArray = newArray.slice(-properties.size);
+        }
+
+        useStore.setState({ [properties.name]: newArray } as Partial<Store>);
     };
 };
 

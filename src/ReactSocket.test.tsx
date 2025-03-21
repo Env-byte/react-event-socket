@@ -18,22 +18,23 @@ interface JoinedRoom {
 
 const wrapPayload: Middleware = ({ name, data }) => ({ action: name, data });
 
-const [socket, hooks] = new ReactEventSocket('ws://localhost:1234', true)
+const [socket, hooks] = new ReactEventSocket({ address: 'ws://localhost:1234', verbose: true, initialConnect: true })
     .addReceivedMessage((received) =>
         received
             .addEvent({
                 name: 'received-message',
                 predicate: (data: ReceivedMessage) => data.action === 'received-message',
                 select: (props) => props.data.message,
-                array: true
+                array: true,
+                size: 3
             })
             .addEvent({
                 name: 'joined-room',
                 predicate: (data: JoinedRoom) => data.action === 'joined-room'
             })
     )
-    .addSendMessage((send) => {
-        return send
+    .addSendMessage((send) =>
+        send
             .addPayload<{
                 channel: string;
             }>()({ name: 'join' })
@@ -41,8 +42,8 @@ const [socket, hooks] = new ReactEventSocket('ws://localhost:1234', true)
             .addPayload<{ message: string }>()({
             name: 'message',
             middleware: [wrapPayload]
-        });
-    })
+        })
+    )
     .build();
 
 describe('Main', () => {
@@ -99,6 +100,51 @@ describe('Main', () => {
                 expect.stringContaining('No select function for event:'),
                 expect.anything()
             );
+        });
+
+        test('should only ever have 3 array items if size is 3', async () => {
+            await server.connected;
+            const { result } = renderHook(() => hooks.useReceivedMessage()); // this should just be string[]
+            act(() => {
+                server.send(
+                    JSON.stringify({
+                        action: 'received-message',
+                        data: { message: '1' }
+                    })
+                );
+                server.send(
+                    JSON.stringify({
+                        action: 'received-message',
+                        data: { message: '2' }
+                    })
+                );
+                server.send(
+                    JSON.stringify({
+                        action: 'received-message',
+                        data: { message: '3' }
+                    })
+                );
+            });
+            expect(result.current).toEqual(['1', '2', '3']);
+            act(() => {
+                server.send(
+                    JSON.stringify({
+                        action: 'received-message',
+                        data: { message: '4' }
+                    })
+                );
+            });
+
+            expect(result.current).toEqual(['2', '3', '4']);
+            act(() => {
+                server.send(
+                    JSON.stringify({
+                        action: 'received-message',
+                        data: { message: '5' }
+                    })
+                );
+            });
+            expect(result.current).toEqual(['3', '4', '5']);
         });
     });
 

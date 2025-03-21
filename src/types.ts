@@ -41,18 +41,22 @@ export type GetStoreProperties<T extends Record<string, any>> = RecordToArray<{
         : never;
 }>;
 
-export interface AddEventConfig<TName extends string = '', TData = any, TSelect = TData, TArray extends boolean = false> {
+export type BaseEventConfig<TName extends string = '', TData = any, TSelect = TData> = {
     predicate: Predicate<TData>;
     select?: Select<TData, TSelect>;
     name: TName;
-    array?: TArray;
-}
+};
+export type AddEventConfig<TName extends string = '', TData = any, TSelect = TData, TArray extends boolean = false> = BaseEventConfig<
+    TName,
+    TSelect,
+    TData
+> &
+    (TArray extends true ? { size?: number; array: true } : { array?: TArray });
 
-export interface StoreProperty<TName extends string, TArray extends boolean, TData = unknown> {
+export type StoreProperty<TName extends string, TArray extends boolean, TData = unknown> = {
     name: TName;
     data: TData;
-    isArray: TArray;
-}
+} & (TArray extends true ? { isArray: true; size: number | undefined } : { isArray?: TArray });
 
 export type Middleware<TData = any> = (props: { name: string; data: TData }) => unknown;
 
